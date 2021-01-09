@@ -89,7 +89,8 @@ class trade:
             close_price = self.position['Close']
             self.next()
 
-        self.sell()
+        for i in range(self.holding_tickers):
+            self.sell()
 
     def result(self):
         if(self.principal):
@@ -157,9 +158,11 @@ for data_file in glob.glob("data/*.xlsx"):
 
     dw['buy'] = signals['buy']
     dw['sell'] = signals['sell']
-    hey = derieved(dw, 0.001425, 0.003, 1, print_tradingTimes=True, print_returnRate=True)
+    hey = derieved(dw, 0.001425, 0.003, 1, print_trading=True,print_tradingTimes=True, print_returnRate=True)
     hey.run()
-    returnRates[data_file] = hey.result()
+    res = hey.result()
+    if res:
+        returnRates[data_file] = res
 
 arr = np.fromiter(returnRates.values(), dtype=float)
 
