@@ -9,7 +9,8 @@ def moving_stop_loss(dw, stop_loss = 0.2):
 
     holding = 0
     high = 0
-    dw['sell'] = np.zeros(dw.shape[0])
+    if not 'sell' in dw:
+        dw['sell'] = np.zeros(dw.shape[0])
     for index, row in dw.iterrows():
         if row['buy'] == 1:
             holding = 1
@@ -101,22 +102,26 @@ def tripleMA_stopLoss(  ticker,
 
     return dw
 
-def WMR(ticker,n = 14, tolerence_interval = 3, upperBound = 80, lowerBound = 20, short_stop_loss = True):
+def WMR(ticker,n = 14, tolerence_interval = 4, upperBound = 80, lowerBound = 20, short_stop_loss = True):
     dw = ticker
 
     dw['current_high'] = dw['Close'].rolling(n).max()
     dw['current_low'] = dw['Close'].rolling(n).min()
     dw['W%R'] = (dw['current_high'] - dw['Close'])/(dw['current_high']-dw['current_low'])*100
 
+    dw['HIGH_current_high'] =  dw['High'].rolling(tolerence_interval).max()
+
     dw['W%R_current_high'] =  dw['W%R'].rolling(tolerence_interval).max()
     dw['W%R_current_low'] =  dw['W%R'].rolling(tolerence_interval).min()
 
-    dw['buy'] = np.where((dw['W%R'] > upperBound) & (dw['W%R'] == dw['W%R_current_high'] ), 1.0, 0.0)
+    dw['buy'] = np.where((dw['W%R'] < lowerBound) & (dw['High'] == dw['HIGH_current_high'] ), 1.0, 0.0)
+
 
     if short_stop_loss:
         dw = moving_stop_loss(dw, 0.2)
     else :
-        dw['sell'] = np.where((dw['W%R'] < lowerBound) & (dw['W%R'] == dw['W%R_current_low'] ), 1.0, 0.0)
+        dw['sell'] = np.where((dw['W%R'] > upperBound) & (dw['High'] != dw['HIGH_current_high']  ), 1.0, 0.0)
+
 
     return dw
 

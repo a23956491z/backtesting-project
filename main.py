@@ -28,7 +28,7 @@ for data_file in glob.glob("data/*.xlsx"):
         print(data_file, end='\n' if print_format['fileNameNewLine'] else '')
     ticker = readStock_excel(data_file)
 
-    dw = KDBuy_KDSell(ticker)
+    dw = WMR(ticker, short_stop_loss=True)
 
     bakctesting = derieved(dw, 0.001425, 0.003, 1,
                     print_trading=print_format['tradingRecord'],
