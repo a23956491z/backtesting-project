@@ -30,7 +30,7 @@ def moving_stop_loss(dw, stop_loss = 0.2):
     return dw
 
 
-def strategy1(ticker):
+def KDBuy_KDSell(ticker):
 
 
     dw = ticker
@@ -60,7 +60,7 @@ def strategy1(ticker):
 
     return dw
 
-def strategy2(ticker):
+def KDBuy_stopLoss(ticker):
 
     dw = ticker
     dw['slowk'], dw['slowd'] = talib.STOCH(
@@ -90,7 +90,7 @@ def strategy2(ticker):
 
 
 ma_window_short, ma_window_mid,ma_window_long = 5,15,30
-def strategy3(  ticker,
+def tripleMA_stopLoss(  ticker,
                 ma_window_short = 7,
                 ma_window_mid = 15,
                 ma_window_long = 21,
@@ -162,7 +162,7 @@ if __name__ == '__main__':
         mpf.plot(dw, type='candle' ,mav=(ma_window_short, ma_window_mid,ma_window_long))
     ticker = readStock_excel('data/2327.xlsx')
 
-    dw = strategy3(ticker)
+    dw = tripleMA_stopLoss(ticker)
 
     print(dw)
     plot_MA(dw)
