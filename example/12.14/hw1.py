@@ -65,3 +65,4 @@ ax1.plot(ticker.index, np.linspace(rsi_lower_bound,rsi_lower_bound, ticker.shape
 ax2.plot(ticker.index, ticker['Method'])
 
 plt.gcf().autofmt_xdate()
+plt.show()
