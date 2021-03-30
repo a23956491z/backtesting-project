@@ -1,17 +1,40 @@
 import pandas as pd
 import numpy as np
 import glob
+from functools import partial
 
 from tools import trade
-from tools import readStock_excel
+from tools import readStock_file
 
 from strategy import *
 
-print_format = {'tradingRecord'     : True,
-                'tradingNum'        : True,
+########  Basic Settings  ########
+print_format = {'tradingRecord'     : False,
+                'tradingNum'        : False,
                 'fileName'          : True,
-                'fileNameNewLine'   : True,
+                'fileNameNewLine'   : False,
                 'returnRate'        : True}
+
+file_pattern = "parse_data/data/splited/00*.csv"
+
+choose_strategy = 'WMR'
+########  Basic Settings  ########
+
+########  Strategiy Configuration  ########
+strategies = {
+    'WMR' : partial(
+        WMR,
+        short_stop_loss=True),
+    'Complete_KD' : partial(
+        KDBuy_KDSell,
+        short_stop_loss=True),
+    'tripleMA_stopLoss' : partial(tripleMA_stopLoss,
+        ma_window_short = 7,
+        ma_window_mid = 15,
+        ma_window_long = 21,
+        tolerence_interval = 7),
+}
+########  Strategiy Configuration  ########
 
 class derieved(trade):
 
@@ -23,12 +46,12 @@ class derieved(trade):
 
 
 returnRates = {}
-for data_file in glob.glob("data/*.xlsx"):
+for data_file in glob.glob(file_pattern):
     if print_format['fileName']:
         print(data_file, end='\n' if print_format['fileNameNewLine'] else '')
-    ticker = readStock_excel(data_file)
+    ticker = readStock_file(data_file)
 
-    dw = WMR(ticker, short_stop_loss=True)
+    dw = strategies[choose_strategy](ticker)
 
     bakctesting = derieved(dw, 0.001425, 0.003, 1,
                     print_trading=print_format['tradingRecord'],
@@ -41,7 +64,7 @@ for data_file in glob.glob("data/*.xlsx"):
 
 arr = np.fromiter(returnRates.values(), dtype=float)
 
-print("\nFinal total return rate : {}%".format( arr.sum()));
+print("\nFinal total return rate : {}%".format( round(arr.sum(), 4)));
 
 returnRates = dict(sorted(returnRates.items(), key=lambda item: item[1], reverse=True))
 print("Highest 3 return rate :")

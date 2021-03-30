@@ -102,7 +102,7 @@ def tripleMA_stopLoss(  ticker,
 
     return dw
 
-def WMR(ticker,n = 14, tolerence_interval = 4, upperBound = 80, lowerBound = 20, short_stop_loss = True):
+def WMR(ticker, n = 14, tolerence_interval = 4, upperBound = 80, lowerBound = 20, short_stop_loss = True):
     dw = ticker
 
     dw['current_high'] = dw['Close'].rolling(n).max()

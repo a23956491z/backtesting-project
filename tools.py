@@ -2,14 +2,19 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-def readStock_excel(file):
+def readStock_file(file, filetype='csv'):
 
-    df = pd.read_excel(file, engine='openpyxl', parse_dates=True, header=None)
+    if filetype == 'excel':
+        df = pd.read_excel(file, engine='openpyxl', parse_dates=True, header=None)
+    else:
+        df = pd.read_csv(file)
+
     colume_name = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
     df.columns = colume_name
     df = df.set_index('Date')
     df.index = pd.to_datetime(df.index)
     df = df.sort_index()
+    df = df.replace(r'^\s*-$', np.nan, regex=True)
 
     for col in df.columns:
         if(col=='Date'):
@@ -17,7 +22,6 @@ def readStock_excel(file):
         df[col] = np.array([float(x) for x in df[col]])
 
     return df
-
 
 class trade:
 
