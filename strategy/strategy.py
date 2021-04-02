@@ -2,48 +2,31 @@ import pandas as pd
 import talib
 import numpy as np
 
-
+from . import indicator, util
 
 stop_loss = 0.2
-def moving_stop_loss(dw, stop_loss = 0.2):
-
-    holding = 0
-    high = 0
-    if not 'sell' in dw:
-        dw['sell'] = np.zeros(dw.shape[0])
-    for index, row in dw.iterrows():
-        if row['buy'] == 1:
-            holding = 1
-
-        if holding:
-            if row['Close'] < high*(1-stop_loss) :
-                row['sell'] = 1
-
-                #print('sell : ', row['Close'] ,'high : ', high)
-                holding = 0
-                high = 0
-            high = max(row['Close'], high)
-            #print(high)
-    return dw
-
-
-def KDBuy_KDSell(ticker, RSVn = 9,
+def pure_KD(ticker, RSVn = 9,
                         RSVt = 3,
                         Kt = 3,
                         upperBound = 70,
                         lowerBound = 30,
-                        short_stop_loss=True):
+                        short_stop_loss=True,
+                        internal_indicator = True):
 
     dw = ticker
-    dw['slowk'], dw['slowd'] = talib.STOCH(
-    			ticker['High'].values,
-    			ticker['Low'].values,
-    			ticker['Close'].values,
-                            fastk_period=RSVn, #RSV day
-                            slowk_period=RSVt,
-                            slowk_matype=0.0,
-                            slowd_period=Kt,
-                            slowd_matype=0.0)
+
+    if internal_indicator:
+        dw['slowk'], dw['slowd'] = indicator.KD(ticker, RSVn, RSVt, Kt)
+    else:
+        dw['slowk'], dw['slowd'] = talib.STOCH(
+        			ticker['High'].values,
+        			ticker['Low'].values,
+        			ticker['Close'].values,
+                                fastk_period=RSVn, #RSV day
+                                slowk_period=RSVt,
+                                slowk_matype=0.0,
+                                slowd_period=Kt,
+                                slowd_matype=0.0)
 
     dw['signal'] = 0.0
     dw['signal'][RSVn:]  = np.where((dw['slowk'][RSVn:]
@@ -52,7 +35,7 @@ def KDBuy_KDSell(ticker, RSVn = 9,
     dw['buy'] = np.where((dw['slowk'] > upperBound) & (dw['positon'] == 1 ), 1.0, 0.0)
 
     if short_stop_loss:
-        dw = moving_stop_loss(dw, 0.2)
+        dw = util.moving_stop_loss(dw, 0.2)
     else :
         dw['sell'] = np.where((dw['slowk'] < lowerBound) & (dw['positon'] == -1 ), 1.0, 0.0)
 
@@ -64,9 +47,7 @@ def tripleMA_stopLoss(  ticker,
                 ma_window_long = 21,
                 tolerence_interval = 7):
 
-    def crossover(i , a, b):
-        if (((dw.iloc[i][a] > dw.iloc[i][b]) and (dw.iloc[i-1][a] < dw.iloc[i-1][b])) and (dw.iloc[i][a] > dw.iloc[i-1][a])):
-            return 1;
+
     dw = ticker
     dw['ma_short'] = dw['Close'].rolling(ma_window_short).mean()
     dw['ma_mid'] = dw['Close'].rolling(ma_window_mid).mean()
@@ -79,12 +60,12 @@ def tripleMA_stopLoss(  ticker,
         last_cross_long = tolerence_interval
         for i in range(ma_window_long, dw.shape[0]):
 
-            if crossover(i, 'ma_short', 'ma_mid'):
+            if util.crossover(dw, i, 'ma_short', 'ma_mid'):
                 last_cross_mid = 0
-            if crossover(i, 'ma_short', 'ma_long'):
+            if util.crossover(dw, i, 'ma_short', 'ma_long'):
                 last_cross_long = 0
 
-            if (crossover(i, 'ma_mid', 'ma_long') and
+            if (util.crossover(dw, i, 'ma_mid', 'ma_long') and
                 last_cross_mid < tolerence_interval and
                 last_cross_long < tolerence_interval) :
 
@@ -92,14 +73,10 @@ def tripleMA_stopLoss(  ticker,
                 #print(dw.index[i])
                 last_cross_mid = tolerence_interval
                 last_cross_long = tolerence_interval
-
             last_cross_mid = last_cross_mid+1
             last_cross_long = last_cross_long+1
 
-
-    dw = moving_stop_loss(dw, 0.2)
-
-
+    dw = util.moving_stop_loss(dw, 0.2)
     return dw
 
 def WMR(ticker, n = 14, tolerence_interval = 4, upperBound = 80, lowerBound = 20, short_stop_loss = True):
@@ -118,7 +95,7 @@ def WMR(ticker, n = 14, tolerence_interval = 4, upperBound = 80, lowerBound = 20
 
 
     if short_stop_loss:
-        dw = moving_stop_loss(dw, 0.2)
+        dw = util.moving_stop_loss(dw, 0.2)
     else :
         dw['sell'] = np.where((dw['W%R'] > upperBound) & (dw['High'] != dw['HIGH_current_high']  ), 1.0, 0.0)
 

@@ -6,29 +6,34 @@ from functools import partial
 from tools import trade
 from tools import readStock_file
 
-from strategy import *
+from strategy import strategy
 
 ########  Basic Settings  ########
-print_format = {'tradingRecord'     : False,
+print_format = {'tradingRecord'     : True,
                 'tradingNum'        : False,
                 'fileName'          : True,
-                'fileNameNewLine'   : False,
-                'returnRate'        : True}
+                'fileNameNewLine'   : True,
+                'returnRate'        : True,
+                }
 
 file_pattern = "parse_data/data/splited/00*.csv"
 
-choose_strategy = 'WMR'
+choose_strategy = 'tripleMA_stopLoss'
 ########  Basic Settings  ########
 
 ########  Strategiy Configuration  ########
 strategies = {
     'WMR' : partial(
-        WMR,
+        strategy.WMR,
         short_stop_loss=True),
+
     'Complete_KD' : partial(
-        KDBuy_KDSell,
-        short_stop_loss=True),
-    'tripleMA_stopLoss' : partial(tripleMA_stopLoss,
+        strategy.pure_KD,
+        short_stop_loss=True,
+        internal_indicator=True),
+
+    'tripleMA_stopLoss' : partial(
+        strategy.tripleMA_stopLoss,
         ma_window_short = 7,
         ma_window_mid = 15,
         ma_window_long = 21,
