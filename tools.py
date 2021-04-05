@@ -87,7 +87,9 @@ class trade:
             self.holding_tickers < self.holding_limit):
 
             if self.print_trading:
-                print('\t{} buy  {}'.format(datetime.strftime(self.date,'%Y/%m/%d'),round(self.position['Close'] * (1 + self.comission),1)))
+                date = datetime.strftime(self.date,'%Y/%m/%d')
+                close_price = round(self.position['Close'],1)
+                print('\t{} buy  {}'.format(date,close_price))
 
             if(self.principal == 0):
                 self.principal = self.position['Close'] * (1 + self.comission)
@@ -113,12 +115,13 @@ class trade:
     def sell(self):
         if(self.holding_tickers):
             if self.print_trading:
-                print('\t{} sell {}'.format(datetime.strftime(self.date,'%Y/%m/%d'),round(self.position['Close'] * (1 - self.comission - self.tax),1)))
+                date = datetime.strftime(self.date,'%Y/%m/%d')
+                close_price = round(self.position['Close'] ,1)
+                print('\t{} sell {}'.format(date,close_price))
 
             self.balance += self.position['Close'] * (1 - self.comission - self.tax)
 
             self.returns += (self.balance/self.principal)
-            #print("\t",round(self.balance,4), round(self.principal,2), round(self.balance/self.principal,4), round(self.returns,4))
             self.principal, self.balance = 0,0
             self.holding_tickers = self.holding_tickers - 1;
 

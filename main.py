@@ -93,9 +93,9 @@ for data_file in glob.glob(file_pattern):
 # 把 returnRates 內所有的投報率轉換成 numpy 陣列
 returnRates_arr = np.fromiter(returnRates.values(), dtype=float)
 # 用 numpy 加總
-final_return_rate = round(returnRates_arr.sum(), 4))
+final_return_rate = round(returnRates_arr.sum(), 4)
 
-print("\nFinal total return rate : {}%".format(final_return_rate);
+print("\nFinal total return rate : {}%".format(final_return_rate))
 
 # 依照 投報率 進行排序，由高到低
 returnRates = dict(sorted(returnRates.items(), key=lambda item: item[1], reverse=True))
