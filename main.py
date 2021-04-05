@@ -22,7 +22,7 @@ print_format = {'tradingRecord'     : True, # 交易記錄
 file_pattern = "parse_data/data/splited/00*.csv"
 
 # 選取下列策略中的哪一個
-choose_strategy = 'tripleMA_stopLoss'
+choose_strategy = 'WMR'
 ########  Basic Settings  ########
 
 ########  Strategiy Configuration  ########
